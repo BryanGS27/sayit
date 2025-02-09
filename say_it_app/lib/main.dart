@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:say_it/Utils/widgets/circle.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,13 +33,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  //int _counter = 0;
 
-  void _incrementCounter() {
+  /* void _incrementCounter() {
     setState(() {
       _counter++;
     });
-  }
+  } */
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     Row(
                       children: [
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _showOverlayDialog(context);
+                            },
                             icon: Icon(
                               Icons.mic,
                               color: Colors.blue,
@@ -144,4 +147,38 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+void _showOverlayDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierColor: Colors.black.withOpacity(0.6), // Oscurece el fondo
+    builder: (context) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(60.0),
+            child: Container(
+                width: 350,
+                padding: EdgeInsets.all(8),
+                constraints: BoxConstraints(maxHeight: 500),
+                child: Text(
+                  "Aquí se debe escribir lo que se vaya escuchando...",
+                  style: TextStyle(
+                    fontSize: 25,
+                    color: Colors.white,
+                    decoration: TextDecoration.none,
+                  ),
+                )),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 60.0),
+            child: CircleVoice(),
+          )
+        ],
+      );
+    },
+  );
 }

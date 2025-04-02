@@ -1,8 +1,13 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:say_it/Utils/widgets/circle.dart';
 
-void main() {
+late List<CameraDescription> _cameras;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  _cameras = await availableCameras();
   runApp(const MyApp());
 }
 
@@ -33,13 +38,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  //int _counter = 0;
-
-  /* void _incrementCounter() {
-    setState(() {
-      _counter++;
+  late CameraController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = CameraController(_cameras[0], ResolutionPreset.max);
+    controller.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    }).catchError((Object e) {
+      if (e is CameraException) {
+        switch (e.code) {
+          case 'CameraAccessDenied':
+            // Handle access errors here.
+            break;
+          default:
+            // Handle other errors here.
+            break;
+        }
+      }
     });
-  } */
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   height: 50,
                   width: 100,
-                  color: Colors.red,
-                  child: Text("Texto"),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Center(child: Text("Señas")),
                 ),
                 InkWell(
                   borderRadius: BorderRadius.circular(16),
@@ -83,9 +112,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 Container(
                   height: 50,
                   width: 100,
-                  color: Colors.red,
-                  child: Text("Voz"),
-                )
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blue),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Center(child: Text("Voz")),
+                ),
               ],
             ),
           ),
@@ -120,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     Row(
                       children: [
-                        IconButton(
+                        /*  IconButton(
                             onPressed: () {
                               _showOverlayDialog(context);
                             },
@@ -128,11 +159,74 @@ class _MyHomePageState extends State<MyHomePage> {
                               Icons.mic,
                               color: Colors.blue,
                               size: 30.0,
-                            )),
+                            )), */
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _showOverlayDialog(context);
+                              /* if (!controller.value.isInitialized) {
+                                
+                                /* CameraPreview(controller);
+                                controller.initialize(); */
+                              } */
+                            },
                             icon: Icon(
                               Icons.camera_alt_rounded,
+                              color: Colors.blue,
+                              size: 30.0,
+                            ))
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 248, 248, 248),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text("Aquí se mostrará la traducción"),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        /*  IconButton(
+                            onPressed: () {
+                              _showOverlayDialog(context);
+                            },
+                            icon: Icon(
+                              Icons.mic,
+                              color: Colors.blue,
+                              size: 30.0,
+                            )), */
+                        IconButton(
+                            onPressed: () {
+                              _showOverlayDialog(context);
+                              /* if (!controller.value.isInitialized) {
+                                
+                                /* CameraPreview(controller);
+                                controller.initialize(); */
+                              } */
+                            },
+                            icon: Icon(
+                              Icons.record_voice_over,
                               color: Colors.blue,
                               size: 30.0,
                             ))
@@ -165,7 +259,7 @@ void _showOverlayDialog(BuildContext context) {
                 padding: EdgeInsets.all(8),
                 constraints: BoxConstraints(maxHeight: 500),
                 child: Text(
-                  "Aquí se debe escribir lo que se vaya escuchando...",
+                  "Aquí se debe escribir la traducción mientras se reproduce lo que se tradujo.",
                   style: TextStyle(
                     fontSize: 25,
                     color: Colors.white,

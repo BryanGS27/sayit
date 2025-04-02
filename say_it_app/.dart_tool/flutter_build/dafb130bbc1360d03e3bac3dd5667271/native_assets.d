@@ -1,0 +1,1 @@
+ C:\\Users\\bryan\\Documents\\Projects\\Flutter\\sayit\\say_it_app\\.dart_tool\\flutter_build\\dafb130bbc1360d03e3bac3dd5667271\\native_assets.yaml: 

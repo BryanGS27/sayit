@@ -1,2 +1,6 @@
+Open terminal here.
 Run this in terminal -> pip install -r requirements.txt
+Go to API_REST
+Run this in terminal -> uvicorn app:app --reload
+
 

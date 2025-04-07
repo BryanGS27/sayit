@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CircleVoice extends StatefulWidget {
@@ -72,7 +73,7 @@ class _CircleVoiceState extends State<CircleVoice> {
             borderRadius: BorderRadius.circular(100),
           ),
           child: Icon(
-            Icons.mic,
+            CupertinoIcons.speaker_3_fill,
             color: Colors.white,
             size: 50.0,
           ),

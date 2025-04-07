@@ -8,6 +8,7 @@ import os
 from typing import Optional
 from pydantic import BaseModel
 import uvicorn
+from endpoint_videos import router as videosEndPoint
 
 # Configuración
 MODEL_PATH = 'modelos/modelo_señas_rf.pkl'
@@ -64,6 +65,8 @@ def process_image(image: np.ndarray) -> Optional[dict]:
         }
     except Exception as e:
         raise RuntimeError(f"Error en procesamiento: {str(e)}")
+    
+app.include_router(videosEndPoint)
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_sign(

@@ -4,8 +4,8 @@ import psycopg2
 # Configura tus datos de conexión
 DB_HOST = "localhost"
 DB_NAME = "say_it_database"
-DB_USER = "postgres"
-DB_PASSWORD = "Juanes123"
+DB_USER = "sayitadmin"
+DB_PASSWORD = "Juanes123UWU"
 DB_PORT = "5432"
 
 # Ruta de la carpeta donde están los videos

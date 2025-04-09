@@ -9,7 +9,7 @@ DB_PASSWORD = "Juanes123UWU"
 DB_PORT = "5432"
 
 # Ruta de la carpeta donde están los videos
-CARPETA_VIDEOS = "C:/Users/bryan/Documents/Projects/Flutter/sayit/Database/videos"
+CARPETA_VIDEOS = "/root/sayit/Database/videos"
 
 # Conexión a la base de datos
 conn = psycopg2.connect(

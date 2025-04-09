@@ -19,7 +19,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isCameraInitialized = false;
   bool _availableServer = false;
   bool _prediction = false;
-  String prediction = "";
+  String palabra = "Utiliza la cámara para crear palabras";
 
   XFile? _imageFile; // Archivo de la foto tomada
   Timer? _predictionTimer; // Timer para hacer la predicción cada 5 segundos
@@ -31,7 +31,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _initializeCamera() async {
-    await getServerStatus();
+    _prediction = await getServerStatus();
     if (_availableServer) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -93,13 +93,25 @@ class _CameraScreenState extends State<CameraScreen> {
         return;
 
       try {
-        XFile image = await _cameraController!.takePicture();
-        setState(() {
-          _imageFile = image;
-        });
+        if (_prediction) {
+          XFile image = await _cameraController!.takePicture();
+          setState(() {
+            _imageFile = image;
+          });
 
-        // Llama a la predicción del servidor
-        await getServerPrediction(File(image.path).path, context);
+          // Llama a la predicción del servidor
+          final aux = await getServerPrediction(File(image.path).path, context);
+          setState(() {
+            if (palabra == "Utiliza la cámara para crear palabras") {
+              print("piuta madre");
+              print("piuta madre");
+              palabra = aux;
+            } else {
+              print("piuta ");
+              palabra = "$palabra$aux";
+            }
+          });
+        }
       } catch (e) {
         print("Error al tomar foto: $e");
       }
@@ -171,8 +183,11 @@ class _CameraScreenState extends State<CameraScreen> {
                                 }
 
                                 File imageFile = File(pickedFile.path);
-                                await getServerPrediction(
+                                final aux = await getServerPrediction(
                                     imageFile.path, context);
+                                setState(() {
+                                  palabra = "$palabra$aux";
+                                });
                               },
                               child: Container(
                                 margin: EdgeInsets.all(5),
@@ -205,8 +220,20 @@ class _CameraScreenState extends State<CameraScreen> {
                                     _imageFile = image;
                                   });
 
-                                  await getServerPrediction(
+                                  final aux = await getServerPrediction(
                                       File(image.path).path, context);
+
+                                  setState(() {
+                                    if (palabra ==
+                                        "Utiliza la cámara para crear palabras") {
+                                      print("piuta madre");
+                                      print("piuta madre");
+                                      palabra = aux;
+                                    } else {
+                                      print("piuta ");
+                                      palabra = "$palabra$aux";
+                                    }
+                                  });
                                 } catch (e) {
                                   print("Error al tomar foto: $e");
                                 }
@@ -231,7 +258,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Container(
-                        height: 300,
+                        height: 150,
                         decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.blue),
@@ -251,12 +278,32 @@ class _CameraScreenState extends State<CameraScreen> {
                                         255, 248, 248, 248),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child:
-                                      Text("La letra predecida es $prediction"),
+                                  child: Text(palabra),
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(100),
+                      onTap: () async {
+                        setState(() {
+                          palabra = "Utiliza la cámara para crear palabras";
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.all(5),
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                            color: Colors.lightBlue,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: Icon(
+                          Icons.replay_sharp,
+                          size: 30,
+                          color: Colors.white,
                         ),
                       ),
                     )
@@ -271,8 +318,8 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
-  Future<void> getServerStatus() async {
-    var url = Uri.parse("http://192.168.100.3:8000/health");
+  Future<bool> getServerStatus() async {
+    var url = Uri.parse("http://157.245.10.241:8000/health");
 
     try {
       final response = await http.get(url);
@@ -280,17 +327,19 @@ class _CameraScreenState extends State<CameraScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _availableServer = true;
-        return data["status"];
+        return true;
       }
     } catch (e) {
       e;
+      return false;
     }
+    return false;
   }
 
-  Future<void> getServerPrediction(String path, BuildContext context) async {
+  Future<String> getServerPrediction(String path, BuildContext context) async {
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://192.168.100.3:8000/predict'),
+      Uri.parse('http://157.245.10.241:8000/predict'),
     );
 
     request.files.add(
@@ -318,6 +367,7 @@ class _CameraScreenState extends State<CameraScreen> {
             duration: Duration(seconds: 3), // Duración en pantalla
           ),
         );
+        return jsonResponse['prediction'].toString();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -333,6 +383,7 @@ class _CameraScreenState extends State<CameraScreen> {
             duration: Duration(seconds: 3), // Duración en pantalla
           ),
         );
+        return "";
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -351,5 +402,6 @@ class _CameraScreenState extends State<CameraScreen> {
       );
       print("Error de conexión: $e");
     }
+    return "";
   }
 }

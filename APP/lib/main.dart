@@ -78,176 +78,189 @@ class _MyHomePageState extends State<MyHomePage> {
         preferredSize: Size.fromHeight(80),
         child: AppBarSayIt(),
       ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 30, bottom: 10),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 248, 248, 248),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: TextField(
-                            controller: _controller,
-                            maxLines: null,
-                            expands: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 30, bottom: 10),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.blue),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 248, 248, 248),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: TextField(
+                              controller: _controller,
+                              maxLines: null,
+                              expands: true,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Ingresa tu texto a traducir",
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                setState(() {
-                                  videos = [];
-                                  controllers = [];
-                                });
-                                videos = await obtenerVideosDesdeTexto(
-                                    _controller.text);
-                                for (final video in videos) {
-                                  final file = await video.getVideoFile();
-                                  final controller =
-                                      VideoPlayerController.file(file);
-                                  await controller.initialize();
-                                  controllers.add(controller);
-                                }
-                                setState(() {});
-                              },
-                              icon: Icon(
-                                Icons.send_rounded,
-                                color: Colors.blue,
-                                size: 30.0,
-                              )),
-                          IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CameraScreen()),
-                                );
-                              },
-                              icon: Icon(
-                                Icons.camera_alt_rounded,
-                                color: Colors.blue,
-                                size: 30.0,
-                              )),
-                          IconButton(
-                              onPressed: () {
-                                _showOverlayDialog(context);
-                              },
-                              icon: Icon(
-                                CupertinoIcons.speaker_3_fill,
-                                color: Colors.blue,
-                                size: 30.0,
-                              )),
-                          IconButton(
-                              onPressed: () {
-                                _showOverlayDialog(context);
-                              },
-                              icon: Icon(
-                                Icons.mic,
-                                color: Colors.blue,
-                                size: 30.0,
-                              )),
-                        ],
-                      )
-                    ],
+                        Row(
+                          children: [
+                            IconButton(
+                                onPressed: () async {
+                                  setState(() {
+                                    videos = [];
+                                    controllers = [];
+                                  });
+                                  videos = await obtenerVideosDesdeTexto(
+                                      _controller.text);
+                                  for (final video in videos) {
+                                    final file = await video.getVideoFile();
+                                    final controller =
+                                        VideoPlayerController.file(file);
+                                    await controller.initialize();
+                                    controllers.add(controller);
+                                  }
+                                  setState(() {});
+                                },
+                                icon: Icon(
+                                  Icons.send_rounded,
+                                  color: Colors.blue,
+                                  size: 30.0,
+                                )),
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CameraScreen()),
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.camera_alt_rounded,
+                                  color: Colors.blue,
+                                  size: 30.0,
+                                )),
+                            IconButton(
+                                onPressed: () {
+                                  _showOverlayDialog(context);
+                                },
+                                icon: Icon(
+                                  CupertinoIcons.speaker_3_fill,
+                                  color: Colors.blue,
+                                  size: 30.0,
+                                )),
+                            IconButton(
+                                onPressed: () {
+                                  _showOverlayDialog(context);
+                                },
+                                icon: Icon(
+                                  Icons.mic,
+                                  color: Colors.blue,
+                                  size: 30.0,
+                                )),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: Container(
-                height: 400,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(16)),
+              Visibility(
+                visible: videos.isNotEmpty,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, right: 8, left: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 248, 248, 248),
-                            borderRadius: BorderRadius.circular(10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
+                  child: Container(
+                    height: 400,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.blue),
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(top: 8.0, right: 8, left: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 248, 248, 248),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: controllers.isEmpty
+                                  ? Center(child: CircularProgressIndicator())
+                                  : ListView.builder(
+                                      itemCount: controllers.length,
+                                      itemBuilder: (context, index) {
+                                        final controller = controllers[index];
+                                        return Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                videos[index]
+                                                    .nombre
+                                                    .toUpperCase(),
+                                                style: TextStyle(
+                                                    fontSize: 25,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle:
+                                                        FontStyle.italic),
+                                              ),
+                                            ),
+                                            AspectRatio(
+                                              aspectRatio:
+                                                  controller.value.aspectRatio,
+                                              child: VideoPlayer(controller),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(
+                                                  controller.value.isPlaying
+                                                      ? Icons.pause
+                                                      : Icons.play_arrow),
+                                              onPressed: () {
+                                                setState(() {
+                                                  controller.value.isPlaying
+                                                      ? controller.pause()
+                                                      : controller.play();
+                                                });
+                                              },
+                                            ),
+                                            Divider()
+                                          ],
+                                        );
+                                      },
+                                    ),
+                            ),
                           ),
-                          child: controllers.isEmpty
-                              ? Center(child: CircularProgressIndicator())
-                              : ListView.builder(
-                                  itemCount: controllers.length,
-                                  itemBuilder: (context, index) {
-                                    final controller = controllers[index];
-                                    return Column(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
-                                            videos[index].nombre.toUpperCase(),
-                                            style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle: FontStyle.italic),
-                                          ),
-                                        ),
-                                        AspectRatio(
-                                          aspectRatio:
-                                              controller.value.aspectRatio,
-                                          child: VideoPlayer(controller),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(controller.value.isPlaying
-                                              ? Icons.pause
-                                              : Icons.play_arrow),
-                                          onPressed: () {
-                                            setState(() {
-                                              controller.value.isPlaying
-                                                  ? controller.pause()
-                                                  : controller.play();
-                                            });
-                                          },
-                                        ),
-                                        Divider()
-                                      ],
-                                    );
-                                  },
-                                ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -304,7 +317,7 @@ class VideoInfo {
 }
 
 Future<List<VideoInfo>> obtenerVideosDesdeTexto(String texto) async {
-  final url = Uri.parse('http://192.168.100.3:8000/obtener_video/');
+  final url = Uri.parse('http://157.245.10.241:8000/obtener_video/');
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},

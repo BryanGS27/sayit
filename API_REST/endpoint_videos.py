@@ -13,9 +13,10 @@ nlp = spacy.load("es_core_news_sm")
 # Configuración de la base de datos
 DB_HOST = "localhost"
 DB_NAME = "say_it_database"
-DB_USER = "postgres"
-DB_PASSWORD = "Juanes123"
+DB_USER = "sayitadmin"
+DB_PASSWORD = "Juanes123UWU"
 DB_PORT = "5432"
+
 
 # Modelo para recibir el texto
 class TextoEntrada(BaseModel):

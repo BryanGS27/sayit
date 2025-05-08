@@ -52,10 +52,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _controller = TextEditingController();
   List<VideoPlayerController> controllers = [];
   List<VideoInfo> videos = [];
   int currentVideoIndex = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -68,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
     for (final controller in controllers) {
       controller.dispose();
     }
+    _scrollController.dispose(); // <- aquí
     super.dispose();
   }
 
@@ -124,19 +127,58 @@ class _MyHomePageState extends State<MyHomePage> {
                             IconButton(
                                 onPressed: () async {
                                   setState(() {
-                                    videos = [];
-                                    controllers = [];
+                                    isLoading = true;
                                   });
                                   videos = await obtenerVideosDesdeTexto(
                                       _controller.text);
-                                  for (final video in videos) {
-                                    final file = await video.getVideoFile();
+
+                                  // Limpiar anteriores
+                                  for (final controller in controllers) {
+                                    await controller.dispose();
+                                  }
+                                  controllers.clear();
+
+                                  for (int i = 0; i < videos.length; i++) {
+                                    final file = await videos[i].getVideoFile();
                                     final controller =
                                         VideoPlayerController.file(file);
                                     await controller.initialize();
+
+                                    final index =
+                                        i; // capturamos el índice para evitar bugs por referencia
+
+                                    controller.addListener(() async {
+                                      final isFinished =
+                                          controller.value.position >=
+                                                  controller.value.duration &&
+                                              !controller.value.isPlaying;
+
+                                      if (isFinished &&
+                                          index == currentVideoIndex &&
+                                          index + 1 < controllers.length) {
+                                        currentVideoIndex = index + 1;
+
+                                        await controllers[currentVideoIndex]
+                                            .seekTo(Duration.zero);
+                                        await controllers[currentVideoIndex]
+                                            .play();
+
+                                        _scrollController.animateTo(
+                                          370.0 * currentVideoIndex,
+                                          duration: Duration(milliseconds: 500),
+                                          curve: Curves.easeInOut,
+                                        );
+
+                                        setState(() {});
+                                      }
+                                    });
+
                                     controllers.add(controller);
                                   }
-                                  setState(() {});
+
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                 },
                                 icon: Icon(
                                   Icons.send_rounded,
@@ -181,84 +223,114 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              Visibility(
-                visible: videos.isNotEmpty,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-                  child: Container(
-                    height: 400,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.blue),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.only(top: 8.0, right: 8, left: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 248, 248, 248),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: controllers.isEmpty
-                                  ? Center(child: CircularProgressIndicator())
-                                  : ListView.builder(
-                                      itemCount: controllers.length,
-                                      itemBuilder: (context, index) {
-                                        final controller = controllers[index];
-                                        return Column(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                videos[index]
-                                                    .nombre
-                                                    .toUpperCase(),
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontStyle:
-                                                        FontStyle.italic),
-                                              ),
-                                            ),
-                                            AspectRatio(
-                                              aspectRatio:
-                                                  controller.value.aspectRatio,
-                                              child: VideoPlayer(controller),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                  controller.value.isPlaying
-                                                      ? Icons.pause
-                                                      : Icons.play_arrow),
-                                              onPressed: () {
-                                                setState(() {
-                                                  controller.value.isPlaying
-                                                      ? controller.pause()
-                                                      : controller.play();
-                                                });
+              isLoading == true
+                  ? Container(
+                      padding: EdgeInsets.only(top: 200),
+                      child: CircularProgressIndicator(
+                        color: Colors.blue,
+                      ))
+                  : videos.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 30),
+                          child: Container(
+                            height: 400,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(color: Colors.blue),
+                                borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 8.0, right: 8, left: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      width: double.infinity,
+                                      //padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                            255, 248, 248, 248),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: controllers.isEmpty
+                                          ? Center(
+                                              child:
+                                                  CircularProgressIndicator())
+                                          : ListView.builder(
+                                              controller: _scrollController,
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: controllers.length,
+                                              itemBuilder: (context, index) {
+                                                final controller =
+                                                    controllers[index];
+                                                return SizedBox(
+                                                  width: 370,
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Text(
+                                                          videos[index]
+                                                              .nombre
+                                                              .toUpperCase(),
+                                                          style: TextStyle(
+                                                              fontSize: 25,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic),
+                                                        ),
+                                                      ),
+                                                      AspectRatio(
+                                                        aspectRatio: controller
+                                                            .value.aspectRatio,
+                                                        child: VideoPlayer(
+                                                            controller),
+                                                      ),
+                                                      IconButton(
+                                                        icon: Icon(controller
+                                                                .value.isPlaying
+                                                            ? Icons.pause
+                                                            : Icons.play_arrow),
+                                                        onPressed: () async {
+                                                          for (final c
+                                                              in controllers) {
+                                                            await c.pause();
+                                                            await c.seekTo(
+                                                                Duration.zero);
+                                                          }
+
+                                                          currentVideoIndex =
+                                                              index;
+
+                                                          if (!controller.value
+                                                              .isPlaying) {
+                                                            await controller
+                                                                .play();
+                                                          }
+
+                                                          setState(() {});
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
                                               },
                                             ),
-                                            Divider()
-                                          ],
-                                        );
-                                      },
                                     ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )
+                        )
+                      : SizedBox()
             ],
           ),
         ),
@@ -334,6 +406,7 @@ Future<List<VideoInfo>> obtenerVideosDesdeTexto(String texto) async {
             ))
         .toList();
   } else {
-    throw Exception('Error al obtener videos: ${response.body}');
+    final List<VideoInfo> videos = [];
+    return videos;
   }
 }

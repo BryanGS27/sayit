@@ -22,7 +22,7 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 # Extensiones de video que se aceptan
-EXTENSIONES_VALIDAS = (".mp4", ".avi", ".mov", ".mkv")
+EXTENSIONES_VALIDAS = (".mp4", ".avi", ".mov", ".mkv", ".png")
 
 # Recorremos los archivos en la carpeta
 for archivo_nombre in os.listdir(CARPETA_VIDEOS):

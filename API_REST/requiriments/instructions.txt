@@ -15,9 +15,13 @@ uvicorn app:app --host 192.168.100.3 --port 8000
 
 /*****/ para el servidor
 ssh root@157.245.10.241
+screen -S mi_servidor
 cd sayit
 source sayitenv/bin/activate
 cd API_REST
 uvicorn app:app --host 0.0.0.0 --port 8000
 
 sudo shutdown -r now
+
+screen -r mi_servidor <---- volver a la sesión
+ctr+a y ctrl+d para salir

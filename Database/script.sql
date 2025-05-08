@@ -1,12 +1,12 @@
 CREATE DATABASE say_it_database;
 
-CREATE TABLE videos (id SERIAL PRIMARY KEY,nombre TEXT NOT NULL,video BYTEA NOT NULL);
+CREATE TABLE videos (id SERIAL PRIMARY KEY,nombre TEXT NOT NULL,video BYTEA NOT NULL, tipo TEXT NOT NULL CHECK (tipo IN ('video', 'imagen')));
 
 CREATE TABLE sinonimos ( id SERIAL PRIMARY KEY, forma TEXT UNIQUE NOT NULL, palabra_id INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE );
 
 SELECT id, nombre, octet_length(video) AS tamanio_bytes FROM videos;
 
-INSERT INTO sinonimos (forma, palabra_id) VALUES ('abrazo', 1), ('abrazando', 1), ('abrazado', 1), ('abrazarme', 1);
+INSERT INTO sinonimos (forma, palabra_id) VALUES ('abrazo', 38), ('abrazando', 38), ('abrazado', 38), ('abrazarme', 38);
 
 
 sudo -u postgres psql -d say_it_database

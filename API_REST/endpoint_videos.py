@@ -17,7 +17,6 @@ DB_USER = "sayitadmin"
 DB_PASSWORD = "Juanes123UWU"
 DB_PORT = "5432"
 
-
 # Modelo para recibir el texto
 class TextoEntrada(BaseModel):
     texto: str
@@ -46,11 +45,11 @@ async def obtener_video(texto: TextoEntrada):
     try:
         for palabra in lemas:
             cur.execute("""
-                SELECT v.nombre, v.video
+                SELECT v.nombre, v.video, v.tipo
                 FROM videos v
                 WHERE v.nombre = %s
                 UNION
-                SELECT s.forma, v.video
+                SELECT s.forma, v.video, v.tipo
                 FROM sinonimos s
                 JOIN videos v ON v.id = s.palabra_id
                 WHERE s.forma = %s
@@ -59,11 +58,12 @@ async def obtener_video(texto: TextoEntrada):
             video = cur.fetchone()
 
             if video:
-                nombre_video, contenido_video = video
+                nombre_video, contenido_video, tipo = video
                 video_base64 = base64.b64encode(contenido_video).decode('utf-8')
                 videos_a_enviar.append({
                     "nombre": nombre_video,
-                    "video_base64": video_base64
+                    "video_base64": video_base64,
+                    "es_imagen": tipo == "imagen"
                 })
 
         if not videos_a_enviar:
